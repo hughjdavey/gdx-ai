@@ -182,7 +182,7 @@ public class SteeringBehaviorsTest extends ApplicationAdapter {
 		stage.addActor(statusBar);
 
 		// Set selected behavior
-		changeTest(0, 0);
+		changeTest(0, 4);
 	}
 
 	@Override
