@@ -16,6 +16,7 @@
 
 package com.badlogic.gdx.ai.tests.steer.scene2d.tests;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.steer.behaviors.FollowFlowField;
 import com.badlogic.gdx.ai.steer.behaviors.FollowFlowField.FlowField;
 import com.badlogic.gdx.ai.tests.SteeringBehaviorsTest;
@@ -45,7 +46,7 @@ public class Scene2dFollowFlowFieldTest extends Scene2dSteeringTest {
 
 	SteeringActor character;
 
-	RandomFlowField2DWithRepulsors flowField;
+	MagnetFlowField flowField;
 
 	public Scene2dFollowFlowFieldTest (SteeringBehaviorsTest container) {
 		super(container, "Follow Flow Field");
@@ -61,65 +62,73 @@ public class Scene2dFollowFlowFieldTest extends Scene2dSteeringTest {
 
 		// Create obstacles
 		Array<SteeringActor> obstacles = new Array<SteeringActor>();
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 1; i++) {
 			SteeringActor obstacle = new SteeringActor(container.cloud, false);
-			setRandomNonOverlappingPosition(obstacle, obstacles, 100);
+			//setRandomNonOverlappingPosition(obstacle, obstacles, 100);
+			setMagnetPositionToMiddle(obstacle);
 			obstacles.add(obstacle);
 			testTable.addActor(obstacle);
 		}
 
-		character = new SteeringActor(container.badlogicSmall, false);
-		character.setMaxLinearSpeed(300);
-		character.setMaxLinearAcceleration(400);
 
-		flowField = new RandomFlowField2DWithRepulsors(container.stageWidth, container.stageHeight, container.badlogicSmall.getRegionWidth(), obstacles);
-		final FollowFlowField<Vector2> followFlowFieldSB = new FollowFlowField<Vector2>(character, flowField);
-		character.setSteeringBehavior(followFlowFieldSB);
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				character = new SteeringActor(container.badlogicSmall, false);
+				character.setMaxLinearSpeed(300);
+				character.setMaxLinearAcceleration(400);
 
-		testTable.addActor(character);
+				//flowField = new RandomFlowField2DWithRepulsors(container.stageWidth, container.stageHeight, container.badlogicSmall.getRegionWidth(), obstacles);
+				flowField = new MagnetFlowField(container.stageWidth, container.stageHeight, container.badlogicSmall.getRegionWidth(), obstacles);
+				final FollowFlowField<Vector2> followFlowFieldSB = new FollowFlowField<Vector2>(character, flowField);
+				character.setSteeringBehavior(followFlowFieldSB);
 
-		character.setPosition(container.stageWidth / 2, container.stageHeight / 2, Align.center);
+				testTable.addActor(character);
 
-		Table detailTable = new Table(container.skin);
+				character.setPosition(container.stageWidth / 4, container.stageHeight - (container.stageHeight / (4 - i)), Align.center);
+				character.getLinearVelocity().set(100 * (j + 1), 0);
 
-		detailTable.row();
-		addMaxLinearAccelerationController(detailTable, character, 0, 10000, 20);
+				Table detailTable = new Table(container.skin);
 
-		detailTable.row();
-		addMaxLinearSpeedController(detailTable, character);
+				detailTable.row();
+				addMaxLinearAccelerationController(detailTable, character, 0, 10000, 20);
 
-		detailTable.row();
-		final Label labelPredictionTime = new Label("Prediction Time [" + followFlowFieldSB.getPredictionTime() + " sec.]", container.skin);
-		detailTable.add(labelPredictionTime);
-		detailTable.row();
-		Slider predictionTime = new Slider(0, 3, .1f, false, container.skin);
-		predictionTime.setValue(followFlowFieldSB.getPredictionTime());
-		predictionTime.addListener(new ChangeListener() {
-			@Override
-			public void changed (ChangeEvent event, Actor actor) {
-				Slider slider = (Slider)actor;
-				followFlowFieldSB.setPredictionTime(slider.getValue());
-				labelPredictionTime.setText("Prediction Time [" + slider.getValue() + " sec.]");
+				detailTable.row();
+				addMaxLinearSpeedController(detailTable, character);
+
+				detailTable.row();
+				final Label labelPredictionTime = new Label("Prediction Time [" + followFlowFieldSB.getPredictionTime() + " sec.]", container.skin);
+				detailTable.add(labelPredictionTime);
+				detailTable.row();
+				Slider predictionTime = new Slider(0, 3, .1f, false, container.skin);
+				predictionTime.setValue(followFlowFieldSB.getPredictionTime());
+				predictionTime.addListener(new ChangeListener() {
+					@Override
+					public void changed(ChangeEvent event, Actor actor) {
+						Slider slider = (Slider) actor;
+						followFlowFieldSB.setPredictionTime(slider.getValue());
+						labelPredictionTime.setText("Prediction Time [" + slider.getValue() + " sec.]");
+					}
+				});
+				detailTable.add(predictionTime);
+
+				detailTable.row();
+				addSeparator(detailTable);
+
+				detailTable.row();
+				CheckBox debug = new CheckBox("Draw Flow Field", container.skin);
+				debug.setChecked(drawDebug);
+				debug.addListener(new ClickListener() {
+					@Override
+					public void clicked(InputEvent event, float x, float y) {
+						CheckBox checkBox = (CheckBox) event.getListenerActor();
+						drawDebug = checkBox.isChecked();
+					}
+				});
+				detailTable.add(debug);
+
+				detailWindow = createDetailWindow(detailTable);
 			}
-		});
-		detailTable.add(predictionTime);
-
-		detailTable.row();
-		addSeparator(detailTable);
-
-		detailTable.row();
-		CheckBox debug = new CheckBox("Draw Flow Field", container.skin);
-		debug.setChecked(drawDebug);
-		debug.addListener(new ClickListener() {
-			@Override
-			public void clicked (InputEvent event, float x, float y) {
-				CheckBox checkBox = (CheckBox)event.getListenerActor();
-				drawDebug = checkBox.isChecked();
-			}
-		});
-		detailTable.add(debug);
-
-		detailWindow = createDetailWindow(detailTable);
+		}
 	}
 
 	Vector2 tmp1 = new Vector2();
@@ -179,6 +188,46 @@ public class Scene2dFollowFlowFieldTest extends Scene2dSteeringTest {
 						}
 					}
 					field[i][j] = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
+				}
+			}
+		}
+
+		@Override
+		public Vector2 lookup (Vector2 position) {
+			int column = (int)MathUtils.clamp(position.x / resolution, 0, columns - 1);
+			int row = (int)MathUtils.clamp(position.y / resolution, 0, rows - 1);
+			return field[column][row];
+		}
+	}
+
+	static class MagnetFlowField implements FlowField<Vector2> {
+
+		Vector2[][] field;
+		int rows, columns;
+		int resolution;
+
+		public MagnetFlowField (float width, float height, int resolution, Array<SteeringActor> magnets) {
+			this.resolution = resolution;
+			this.columns = MathUtils.ceil(width / resolution);
+			this.rows = MathUtils.ceil(height / resolution);
+			this.field = new Vector2[columns][rows];
+
+			for (int i = 0; i < columns; i++) {
+				ROWS:
+				for (int j = 0; j < rows; j++) {
+					for (int k = 0; k < magnets.size; k++) {
+						SteeringActor magnet = magnets.get(k);
+						if (magnet.getPosition().dst(resolution * (i + .5f), resolution * (j + .5f)) < magnet.getBoundingRadius() + 40) {
+							// if we are close enough to the magnet, set an attraction force pointing to the centre of magnet
+							field[i][j] = new Vector2(
+									-(resolution * (i + 0.5f)),
+									-(resolution * (j + 0.5f))
+							).add(magnet.getPosition()).nor();
+							continue ROWS;
+						}
+					}
+					// set every other index to 0,0
+					field[i][j] = new Vector2(0, 0).nor();
 				}
 			}
 		}

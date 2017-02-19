@@ -115,6 +115,11 @@ public abstract class Scene2dSteeringTest extends SteeringTestBase {
 		table.add(alignOrient);
 	}
 
+	protected void setMagnetPositionToMiddle(final SteeringActor magnet) {
+		magnet.setPosition(container.stageWidth / 2, container.stageHeight / 2, Align.center);
+		magnet.getPosition().set(magnet.getX(Align.center), magnet.getY(Align.center));
+	}
+
 	protected void setRandomNonOverlappingPosition (SteeringActor character, Array<SteeringActor> others,
 		float minDistanceFromBoundary) {
 		int maxTries = Math.max(100, others.size * others.size); 
