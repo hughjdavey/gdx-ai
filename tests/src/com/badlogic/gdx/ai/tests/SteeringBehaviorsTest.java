@@ -145,12 +145,12 @@ public class SteeringBehaviorsTest extends ApplicationAdapter {
 	public void create () {
 		Gdx.gl.glClearColor(.3f, .3f, .3f, 1);
 
-		greenFish = new TextureRegion(new Texture("data/green_fish.png"));
-		cloud = new TextureRegion(new Texture("data/particle-cloud.png"));
-		badlogicSmall = new TextureRegion(new Texture("data/badlogicsmall.jpg"));
-		target = new TextureRegion(new Texture("data/target.png"));
+		greenFish = new TextureRegion(new Texture("tests/data/green_fish.png"));
+		cloud = new TextureRegion(new Texture("tests/data/particle-cloud.png"));
+		badlogicSmall = new TextureRegion(new Texture("tests/data/badlogicsmall.jpg"));
+		target = new TextureRegion(new Texture("tests/data/target.png"));
 
-		skin = new Skin(Gdx.files.internal("data/uiskin.json"));
+		skin = new Skin(Gdx.files.internal("tests/data/uiskin.json"));
 
 		stage = new Stage();
 		stage.setDebugAll(DEBUG_STAGE);
